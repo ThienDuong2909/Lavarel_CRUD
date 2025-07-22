@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Post CRUD API</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+    </head>
+    <body class="bg-light">
+        <div class="container py-5">
+            <h2 class="text-center mb-4">📝 Post CRUD – Laravel API</h2>
+
+            <!-- Form thêm bài viết -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    Add New Post
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <input
+                            type="text"
+                            id="title"
+                            class="form-control"
+                            placeholder="Post title"
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <textarea
+                            id="content"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Post content"
+                        ></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="createPost()">
+                        ➕ Add Post
+                    </button>
+                </div>
+            </div>
+
+            <!-- Danh sách bài viết -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    📋 Post List
+                </div>
+                <ul id="post-list" class="list-group list-group-flush"></ul>
+            </div>
+        </div>
+
+        <script>
+            const api = "http://127.0.0.1:8000/api/posts";
+
+            async function fetchPosts() {
+                const res = await fetch(api);
+                const posts = await res.json();
+                const list = document.getElementById("post-list");
+                list.innerHTML = "";
+                posts.forEach((p) => {
+                    const item = document.createElement("li");
+                    item.className =
+                        "list-group-item d-flex justify-content-between align-items-center";
+                    item.innerHTML = `
+          <div>
+            <h5 class="mb-1">${p.title}</h5>
+            <p class="mb-1">${p.content}</p>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deletePost(${p.id})">🗑️ Delete</button>
+        `;
+                    list.appendChild(item);
+                });
+            }
+
+            async function createPost() {
+                const title = document.getElementById("title").value.trim();
+                const content = document.getElementById("content").value.trim();
+                if (!title || !content)
+                    return alert("Please enter both title and content!");
+                await fetch(api, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, content }),
+                });
+                document.getElementById("title").value = "";
+                document.getElementById("content").value = "";
+                fetchPosts();
+            }
+
+            async function deletePost(id) {
+                await fetch(`${api}/${id}`, { method: "DELETE" });
+                fetchPosts();
+            }
+
+            fetchPosts();
+        </script>
+    </body>
+</html>
